@@ -77,6 +77,14 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
 
 
+class ResourcesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Resources
+        fields='__all__'
+
+
+
+
 
 
 

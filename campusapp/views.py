@@ -93,7 +93,7 @@ class StudentProfileView(APIView):
       return Response({'message':'Student List','data':serializer_data.data},status=status.HTTP_200_OK)
    
    def post(self,request):
-      if request.user.role not in ['admin', 'faculty']:
+      if request.user.role !='admin':
          return Response({'message':'you have not  permision to perform this action'},status=status.HTTP_400_BAD_REQUEST)
       data=request.data
       serializer_data=StudentProfileSerializer(data=data)
@@ -103,7 +103,7 @@ class StudentProfileView(APIView):
       return Response({'message':serializer_data.errors},status=status.HTTP_400_BAD_REQUEST)
 
    def patch(self,request):
-      if request.user.role not in ['admin', 'faculty']:
+      if request.user.role !='admin':
          return Response({'message':'you have not  permision to perform this action'},status=status.HTTP_400_BAD_REQUEST)
       data=request.data
       student_id=data.get('student_id')
@@ -118,7 +118,7 @@ class StudentProfileView(APIView):
    
 
    def delete(self,request):
-      if request.user.role not in ['admin', 'faculty']:
+      if request.user.role !='admin':
          return Response({'message':'you have not  permision to perform this action'},status=status.HTTP_400_BAD_REQUEST)
       student_id=request.data.get('student_id')
       if not StudentProfile.objects.filter(id=student_id).exists():
@@ -466,28 +466,63 @@ class SubmissionListView(APIView):
    #    attendance=Attendance.objects.all()
    #    serializer_data=AttendanceSerializer(attendance,many=True)
    #    return Response({'message':'Attendance list of Student','data':serializer_data.data},status=status.HTTP_200_OK)
-      
-      
-
-
-      
 
 
 
 
-    
-    
+class ResourcesView(APIView):
+   authentication_classes=[TokenAuthentication]
+   permission_classes=[IsAuthenticatedOrReadOnly]
+
+   def get(self,request):
+      resources=Resources.objects.all()
+      serializer_data=ResourcesSerializer(resources,many=True)
+      return Response({'message':'List of Resources','data':serializer_data.data},status=status.HTTP_200_OK)
    
 
-   
-
-
-   
-
-
-                 
-
+   def post(self,request):
+      if request.user.role!='faculty':
+         return Response({'message':'Only Faculty Add Resources'},status=status.HTTP_400_BAD_REQUEST)
       
+      faculty=Faculty.objects.get(faculty=request.user)
+      subject_id=request.data.get('subject')
+      subject = SubjectsList.objects.filter(id=subject_id).first()
+      # print(subject,'hwwvyixfxitx')
+      # if not subject:
+      #    return Response({'message':'subject not found'})
+      subject = SubjectsList.objects.get(id=subject_id)
+     
+      if faculty.Department != subject.department:
+         return Response({'message':'faculty and  sujbect department do not match'},status=status.HTTP_400_BAD_REQUEST)  
+      serializer_data=ResourcesSerializer(data=request.data)
+      if serializer_data.is_valid():
+         serializer_data.save(uploaded_by=faculty,subject=subject)
+         return Response(serializer_data.data, status=status.HTTP_201_CREATED)
+
+      return Response(serializer_data.errors, status=status.HTTP_400_BAD_REQUEST)
    
+   def patch(self,request):
+        if request.user.role !='faculty':
+         return Response({'message':'you have not  permision to perform this action'},status=status.HTTP_400_BAD_REQUEST)
+        data=request.data
+        resources_id=data.get('resources_id')
+        if not Resources.objects.filter(id=resources_id).exists():
+           return Response({'message':f"'resource id  doesn't exists'"},status=status.HTTP_400_BAD_REQUEST)
+        resource=Resources.objects.get(id=resources_id)
+        serializer_data=ResourcesSerializer(resource,data=data,partial=True)
+        if serializer_data.is_valid():
+           serializer_data.save()
+           return Response({'message':'data Updated Successfully','data':serializer_data.data},status=status.HTTP_200_OK)
+        return Response({'message':serializer_data.errors},status=status.HTTP_400_BAD_REQUEST)
+         
+
+   
+
+   def delete(self,request):
+      if request.user.role !='faculty':
+         return Response({'message':'you have not  permision to perform this action'},status=status.HTTP_400_BAD_REQUEST)
+      resources_id=request.data.get('resources_id')
+      if not Resources.objects.filter(id=resources_id).exists():
+         return Response({'message':f"resource_id dosen't exists"},status=status.HTTP_400_BAD_REQUEST)
       
-        
+         

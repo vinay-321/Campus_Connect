@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from django.contrib.auth.models import AbstractUser
 
@@ -29,6 +30,7 @@ class SubjectsList(models.Model):
 class Semester(models.Model):
     semester=models.CharField(max_length=10)
     subject=models.ForeignKey(SubjectsList,on_delete=models.CASCADE,related_name='subjects')
+    department=models.ForeignKey(Department,on_delete=models.CASCADE,related_name='department')
 
 
 
@@ -66,6 +68,9 @@ class Assignment(models.Model):
 
 
 class AssignmentSubmission(models.Model):
+
+    def get_current_date():
+     return timezone.now().date()
     
     STATUS=(
         ('submitted','Submitted'),
@@ -79,6 +84,7 @@ class AssignmentSubmission(models.Model):
     submitted_assignment=models.FileField(upload_to='submitted_assginment/')
     status=models.CharField(max_length=20,choices=STATUS)
     feedback=models.CharField(max_length=100 ,null=True,blank=True)
+    submitted_date = models.DateField(default=get_current_date) 
 
 
 class Attendance(models.Model):
@@ -91,6 +97,23 @@ class Attendance(models.Model):
      date=models.DateField(auto_now_add=True)
      subject=models.ForeignKey(SubjectsList,on_delete=models.CASCADE)
      status=models.CharField(max_length=20,choices=STATUS)
+
+
+
+
+class Resources(models.Model):
+    title=models.CharField(max_length=50)
+    description=models.CharField(max_length=50)
+    resource_file=models.FileField()
+    subject=models.ForeignKey(SubjectsList,on_delete=models.CASCADE)
+    uploaded_by=models.ForeignKey(Faculty,on_delete=models.CASCADE)
+    posted_date=models.DateField(auto_now_add=True)
+   
+
+
+
+
+
 
 
 

@@ -15,6 +15,8 @@ urlpatterns = [
     path('submit-assignment/',AssignmentSubmissionView.as_view()),
     path('view-attendance/',StudentAttendanceView.as_view()),
     path('view-submission/',SubmissionListView.as_view()),
+    path('upload-resources/',ResourcesView.as_view()),
+
 
 
    
